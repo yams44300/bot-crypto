@@ -82,7 +82,9 @@ def scan_dumps():
                         continue
 
                 last_alert_time[market] = now
-
+                
+                log_event(market, price, change, volume, "DUMP")
+                
                 signals.append({
                     "market": market,
                     "price": price,
