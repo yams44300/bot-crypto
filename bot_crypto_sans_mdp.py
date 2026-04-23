@@ -17,6 +17,7 @@ EMAIL_RECEIVER = os.getenv("EMAIL_RECEIVER")
 # 👉 mémoire courte (scalping)
 previous_prices = {}
 last_alert_time = {}
+positions = {}
 
 # 👉 évite spam (1 alerte / 10 min max par coin)
 ALERT_COOLDOWN = 600
@@ -82,6 +83,8 @@ def scan_dumps():
                         continue
 
                 last_alert_time[market] = now
+
+                positions[market] = price
                 
                 log_event(market, price, change, volume, "DUMP")
                 
@@ -129,6 +132,21 @@ while True:
 
     try:
         dumps = scan_dumps()
+        
+        for market, entry_price in list(positions.items()):
+            current_price = previous_prices.get(market)
+
+            if not current_price:
+                continue
+
+            change = ((current_price - entry_price) / entry_price) * 100
+
+            if change >= 5:
+                print(f"💰 EXIT {market} +5%")
+
+                log_event(market, current_price, change, 0, "EXIT +5%")
+
+                del positions[market]
 
         if dumps:
             message = "🚨 DUMP DETECTÉ (SCALPING ENTRY)\n\n"
