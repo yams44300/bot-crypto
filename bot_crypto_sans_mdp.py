@@ -1,4 +1,3 @@
-
 import os
 import requests
 import time
@@ -7,32 +6,43 @@ from email.mime.text import MIMEText
 from datetime import datetime
 import csv
 
-print("CSV enregistré dans :", os.getcwd())
 print("Bot lancé ✔️")
 
 URL = "https://api.bitvavo.com/v2/ticker/24h"
 
-# CONFIG EMAIL
 EMAIL_SENDER = os.getenv("EMAIL_SENDER")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 EMAIL_RECEIVER = os.getenv("EMAIL_RECEIVER")
 
-def send_email(message):
-    msg = MIMEText(message)
-    msg["Subject"] = "🚨 Crypto DIP détecté"
-    msg["From"] = EMAIL_SENDER
-    msg["To"] = EMAIL_RECEIVER
+# 👉 mémoire courte (scalping)
+previous_prices = {}
+last_alert_time = {}
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(EMAIL_SENDER, EMAIL_PASSWORD)
-        server.send_message(msg)
+# 👉 évite spam (1 alerte / 10 min max par coin)
+ALERT_COOLDOWN = 600
+
+def send_email(message):
+    try:
+        msg = MIMEText(message)
+        msg["Subject"] = "🚨 DUMP CRYPTO DETECTÉ"
+        msg["From"] = EMAIL_SENDER
+        msg["To"] = EMAIL_RECEIVER
+
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(EMAIL_SENDER, EMAIL_PASSWORD)
+            server.send_message(msg)
+
+    except Exception as e:
+        print("Email error:", e)
 
 def get_data():
-    return requests.get(URL).json()
+    try:
+        return requests.get(URL, timeout=10).json()
+    except Exception as e:
+        print("API error:", e)
+        return []
 
-previous_prices = {}
-
-def scan_dips():
+def scan_dumps():
     data = get_data()
     signals = []
 
@@ -40,35 +50,59 @@ def scan_dips():
         try:
             market = coin["market"]
             price = float(coin["last"])
+            volume = float(coin.get("volume", 0))
 
-            if market in previous_prices:
-                change = ((price - previous_prices[market]) / previous_prices[market]) * 100
+            # init
+            if market not in previous_prices:
+                previous_prices[market] = price
+                continue
 
-                print(market, change)
+            old_price = previous_prices[market]
 
-                if change < -0.8 and volume > 50000:
-                    print("⚠️ petit dip", market, change)
-                if change < -1.5 and volume > 100000:
-                    print("🚨 GROS DIP", market, change)
-                    signals.append({
-                        "market": market,
-                        "price": price,
-                        "change": change,
-                        "volume": float(coin["volume"])
-                    })
+            # variation courte
+            change = ((price - old_price) / old_price) * 100
 
+            print(market, change)
+
+            # update prix
             previous_prices[market] = price
 
+            # ⛔ filtre volume (anti fake dump)
+            if volume < 80000:
+                continue
+
+            # 🚨 DUMP SIGNIFICATIF
+            if -20 <= change <= -10:
+
+                now = time.time()
+
+                # anti spam
+                if market in last_alert_time:
+                    if now - last_alert_time[market] < ALERT_COOLDOWN:
+                        continue
+
+                last_alert_time[market] = now
+
+                signals.append({
+                    "market": market,
+                    "price": price,
+                    "change": change,
+                    "volume": volume
+                })
+
         except Exception as e:
-            print("skip:", e)
             continue
 
     return signals
 
 def save_to_csv(signals):
-    with open("crypto_dips.csv", "w", newline="", encoding="utf-8") as file:
+    file_exists = os.path.isfile("crypto_dumps.csv")
+
+    with open("crypto_dumps.csv", "a", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
-        writer.writerow(["Crypto", "Prix", "24h %", "Volume", "Date", "Status"])
+
+        if not file_exists:
+            writer.writerow(["Crypto", "Prix", "Change %", "Volume", "Date", "Signal"])
 
         for s in signals:
             writer.writerow([
@@ -77,40 +111,31 @@ def save_to_csv(signals):
                 s["change"],
                 s["volume"],
                 datetime.now(),
-                "DIP"
+                "DUMP"
             ])
+
 while True:
     print("Scan en cours...", datetime.now())
 
     try:
-        dips = scan_dips()
+        dumps = scan_dumps()
 
-        if dips:
-            message = "📉 DIPS DÉTECTÉS :\n\n"
+        if dumps:
+            message = "🚨 DUMP DETECTÉ (SCALPING ENTRY)\n\n"
 
-            for d in dips:
-                message += f"{d['market']} | {d['change']}% | prix: {d['price']}\n"
+            for d in dumps:
+                message += f"{d['market']} | {d['change']:.2f}% | price: {d['price']}\n"
 
             print(message)
 
             send_email(message)
-            save_to_csv(dips)
+            save_to_csv(dumps)
 
         else:
-            print("Aucun signal")
-
-            with open("crypto_dips.csv", "a", newline="", encoding="utf-8") as file:
-                writer = csv.writer(file)
-                writer.writerow([
-                    "-",
-                    "-",
-                    "-",
-                    "-",
-                    datetime.now(),
-                    "Aucun signal"
-                ])
+            print("Aucun dump")
 
     except Exception as e:
-        print("Erreur :", e)
+        print("Erreur globale :", e)
 
+    # 👉 IMPORTANT : léger pour Railway free tier
     time.sleep(60)
