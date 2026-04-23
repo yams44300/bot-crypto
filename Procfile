@@ -1,1 +1,1 @@
-worker: python bot_crypto sans mdp.py
+worker: python bot_crypto_sans_mdp.py
