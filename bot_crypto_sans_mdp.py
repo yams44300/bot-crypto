@@ -95,24 +95,32 @@ def scan_dumps():
 
     return signals
 
-def save_to_csv(signals):
-    file_exists = os.path.isfile("crypto_dumps.csv")
+CSV_FILE = "trading_log.csv"
 
-    with open("crypto_dumps.csv", "a", newline="", encoding="utf-8") as file:
+def log_event(market, price, change, volume, status):
+    file_exists = os.path.isfile(CSV_FILE)
+
+    with open(CSV_FILE, "a", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
 
         if not file_exists:
-            writer.writerow(["Crypto", "Prix", "Change %", "Volume", "Date", "Signal"])
-
-        for s in signals:
             writer.writerow([
-                s["market"],
-                s["price"],
-                s["change"],
-                s["volume"],
-                datetime.now(),
-                "DUMP"
+                "Date",
+                "Crypto",
+                "Prix",
+                "Variation %",
+                "Volume",
+                "Status"
             ])
+
+        writer.writerow([
+            datetime.now(),
+            market,
+            price,
+            change,
+            volume,
+            status
+        ])
 
 while True:
     print("Scan en cours...", datetime.now())
