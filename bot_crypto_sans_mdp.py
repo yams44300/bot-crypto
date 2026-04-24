@@ -92,7 +92,7 @@ def scan_dumps():
                 continue
 
             # 🚨 DUMP SIGNIFICATIF
-            if change <= -5:
+            if -8 <= change <= -3:
                 now = time.time()
 
                 # anti spam
@@ -142,7 +142,6 @@ def log_event(market, price, change, volume, status):
         ])
 
 while True:
-    send_email("TEST EMAIL BOT OK")
     print("Scan en cours...", datetime.now())
 
     try:
