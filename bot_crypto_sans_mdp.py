@@ -142,6 +142,7 @@ def log_event(market, price, change, volume, status):
         ])
 
 while True:
+    send_email("TEST EMAIL BOT OK")
     print("Scan en cours...", datetime.now())
 
     try:
