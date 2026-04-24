@@ -10,7 +10,6 @@ import gspread
 from google.oauth2.service_account import Credentials
 
 print("Bot lancé ✔️")
-print("SHEET OK :", sheet)
 print("GOOGLE_CREDS =", os.getenv("GOOGLE_CREDS"))
 
 URL = "https://api.bitvavo.com/v2/ticker/24h"
@@ -38,6 +37,9 @@ creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
 client = gspread.authorize(creds)
 
 sheet = client.open_by_key("1Xvzy0NQdSu9UuztJaEqRZFSokPFHZvRFHjDy8_5YtkI").sheet1
+
+
+print("SHEET OK :", sheet)
 
 # 👉 évite spam (1 alerte / 10 min max par coin)
 ALERT_COOLDOWN = 600
