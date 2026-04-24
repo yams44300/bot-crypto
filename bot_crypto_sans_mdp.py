@@ -150,7 +150,7 @@ def log_event(market, price, change, volume, status):
 
 while True:
     print("Scan en cours...", datetime.now())
-
+    sheet.append_row(["HEARTBEAT", "OK", "", "", "", "SCAN"])
     try:
         dumps = scan_dumps()
 
