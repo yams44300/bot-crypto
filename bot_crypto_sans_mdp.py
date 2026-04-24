@@ -25,7 +25,10 @@ positions = {}
 
 # 🔥 CONFIG GOOGLE SHEETS
 
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
 
 creds_dict = json.loads(os.getenv("GOOGLE_CREDS"))
 
