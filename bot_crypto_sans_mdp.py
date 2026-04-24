@@ -36,7 +36,7 @@ creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
 
 client = gspread.authorize(creds)
 
-sheet = client.open_by_key("1Xvzy0NQdSu9UuztJaEqRZFSokPFHZvRFHjDy8_5YtkI").sheet1
+sheet = client.open_by_key("1Xvzy0NQdSu9UuztJaEqRZFSokPFHZvRFHjDy8_5Ytkl").sheet1
 print("🔥 TEST WRITE SHEET START")
 sheet.append_row(["TEST", "OK", "0", "0", "0", "MANUAL"])
 print("🔥 TEST WRITE DONE")
