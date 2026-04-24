@@ -38,7 +38,6 @@ client = gspread.authorize(creds)
 
 sheet = client.open_by_key("1Xvzy0NQdSu9UuztJaEqRZFSokPFHZvRFHjDy8_5YtkI").sheet1
 
-
 print("SHEET OK :", sheet)
 
 # 👉 évite spam (1 alerte / 10 min max par coin)
