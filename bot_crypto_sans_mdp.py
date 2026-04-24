@@ -37,6 +37,7 @@ creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
 client = gspread.authorize(creds)
 
 sheet = client.open("1Xvzy0NQdSu9UuztJaEqRZFSokPFHZvRFHjDy8_5YtkI").sheet1
+sheet.append_row(["TEST", "OK"])
 
 # 👉 évite spam (1 alerte / 10 min max par coin)
 ALERT_COOLDOWN = 600
