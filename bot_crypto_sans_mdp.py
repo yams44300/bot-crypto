@@ -88,8 +88,7 @@ def scan_dumps():
                 continue
 
             # 🚨 DUMP SIGNIFICATIF
-            if -20 <= change <= -10:
-
+            if change <= -5:
                 now = time.time()
 
                 # anti spam
@@ -115,23 +114,19 @@ def scan_dumps():
 
     return signals
 
-CSV_FILE = "trading_log.csv"
 
 def log_event(market, price, change, volume, status):
-    file_exists = os.path.isfile(CSV_FILE)
-
-    with open(CSV_FILE, "a", newline="", encoding="utf-8") as file:
-        writer = csv.writer(file)
-
-        if not file_exists:
-            writer.writerow([
-                "Date",
-                "Crypto",
-                "Prix",
-                "Variation %",
-                "Volume",
-                "Status"
-            ])
+    try:
+        sheet.append_row([
+            str(datetime.now()),
+            market,
+            price,
+            change,
+            volume,
+            status
+        ])
+    except Exception as e:
+        print("Google Sheets error:", e)
 
         writer.writerow([
             datetime.now(),
@@ -147,6 +142,8 @@ while True:
 
     try:
         dumps = scan_dumps()
+
+        print("Positions :", positions)
         
         for market, entry_price in list(positions.items()):
             current_price = previous_prices.get(market)
@@ -172,7 +169,6 @@ while True:
             print(message)
 
             send_email(message)
-            save_to_csv(dumps)
 
         else:
             print("Aucun dump")
