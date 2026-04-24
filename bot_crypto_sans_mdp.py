@@ -123,6 +123,8 @@ def scan_dumps():
 
 def log_event(market, price, change, volume, status):
     try:
+        print("📊 SHEETS WRITE :", market, price, change, status)
+
         sheet.append_row([
             str(datetime.now()),
             market,
@@ -131,8 +133,11 @@ def log_event(market, price, change, volume, status):
             volume,
             status
         ])
+
+        print("✅ SHEETS OK")
+
     except Exception as e:
-        print("Google Sheets error:", e)
+        print("❌ Google Sheets error:", e)
 
         writer.writerow([
             datetime.now(),
