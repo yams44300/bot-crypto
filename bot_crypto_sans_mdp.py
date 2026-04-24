@@ -10,6 +10,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 
 print("Bot lancé ✔️")
+print("SHEET OK :", sheet)
 print("GOOGLE_CREDS =", os.getenv("GOOGLE_CREDS"))
 
 URL = "https://api.bitvavo.com/v2/ticker/24h"
