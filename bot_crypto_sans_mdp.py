@@ -73,41 +73,19 @@ def scan_dumps():
             market = coin["market"]
             price = float(coin["last"])
             volume = float(coin.get("volume", 0))
-
-            # init
-            if market not in previous_prices:
-                previous_prices[market] = price
-                continue
-
-            old_price = previous_prices[market]
-
-            # variation courte
-            change = ((price - old_price) / old_price) * 100
+            change = float(coin.get("priceChangePercentage", 0))  # 🔥 IMPORTANT
 
             print(market, change)
 
-            # update prix
-            previous_prices[market] = price
-
-            # ⛔ filtre volume (anti fake dump)
             if volume < 80000:
                 continue
 
-            # 🚨 DUMP SIGNIFICATIF
-            if -8 <= change <= -3:
-                now = time.time()
-
-                # anti spam
-                if market in last_alert_time:
-                    if now - last_alert_time[market] < ALERT_COOLDOWN:
-                        continue
-
-                last_alert_time[market] = now
+            if -20 <= change <= -10:
 
                 positions[market] = price
-                
+
                 log_event(market, price, change, volume, "DUMP")
-                
+
                 signals.append({
                     "market": market,
                     "price": price,
@@ -116,7 +94,7 @@ def scan_dumps():
                 })
 
         except Exception as e:
-            continue
+            print("skip:", e)
 
     return signals
 
