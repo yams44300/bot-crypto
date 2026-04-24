@@ -5,6 +5,9 @@ import smtplib
 from email.mime.text import MIMEText
 from datetime import datetime
 import csv
+import json
+import gspread
+from google.oauth2.service_account import Credentials
 
 print("Bot lancé ✔️")
 
@@ -18,6 +21,18 @@ EMAIL_RECEIVER = os.getenv("EMAIL_RECEIVER")
 previous_prices = {}
 last_alert_time = {}
 positions = {}
+
+# 🔥 CONFIG GOOGLE SHEETS
+
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+
+creds_dict = json.loads(os.getenv("GOOGLE_CREDS"))
+
+creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
+
+client = gspread.authorize(creds)
+
+sheet = client.open("Crypto Bot").sheet1
 
 # 👉 évite spam (1 alerte / 10 min max par coin)
 ALERT_COOLDOWN = 600
