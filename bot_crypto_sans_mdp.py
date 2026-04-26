@@ -67,7 +67,7 @@ while True:
                     continue
 
                 # 🎯 DUMP
-                if -10 <= change <= -5: and market not in positions:
+                if -10 <= change <= -5 and market not in positions:
 
                     positions[market] = price
 
