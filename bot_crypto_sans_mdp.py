@@ -36,7 +36,17 @@ creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
 
 client = gspread.authorize(creds)
 
-sheet = client.open_by_key("1Xvzy0NQdSu9UuztJaEqRZFSokPFHZvRFHjDy8_5YtkI").sheet1
+sheet = client.open_by_key("1Xvzy0NQdSu9UuztJaEqRZFSokPFHZvRFHjDy8_5YtkI").worksheet("TRADES")
+
+if not sheet.get("A1"):
+    sheet.update("A1:F1", [[
+        "Date",
+        "Crypto",
+        "Prix",
+        "Variation %",
+        "Volume",
+        "Status"
+    ]])
 
 print("🔥 SHEET TITLE :", sheet.title)
 sheet.append_row(["TEST", "OK"])
@@ -104,14 +114,14 @@ def log_event(market, price, change, volume, status):
     try:
         print("📊 WRITING TO SHEET...")
 
-        sheet.append_row([
-            str(datetime.now()),
-            market,
-            price,
-            change,
-            volume,
-            status
-        ])
+       sheet.insert_row([
+           str(datetime.now()),
+           market,
+           price,
+           change,
+           volume,
+           status
+       ], index=2)
 
         print("✅ WRITE SUCCESS")
 
