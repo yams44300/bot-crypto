@@ -74,7 +74,7 @@ while True:
                 previous_prices[market] = price
 
                 # filtre volume (plus souple)
-               if volume < 20000:
+                if volume < 20000:
                    continue
                    
                 # 🎯 VRAI DUMP (court terme)
