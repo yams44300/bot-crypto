@@ -78,7 +78,7 @@ while True:
                    continue
                    
                 # 🎯 VRAI DUMP (court terme)
-                if change_short <= -1.5 and market not in positions:
+                if change_short <= -2 and market not in positions:
 
                    positions[market] = price
 
