@@ -11,6 +11,7 @@ print("Bot lancé ✔️")
 URL = "https://api.bitvavo.com/v2/ticker/24h"
 
 positions = {}
+previous_prices = {}
 
 # GOOGLE SHEETS
 SCOPES = [
@@ -62,18 +63,28 @@ while True:
                 volume = float(coin.get("volume", 0))
                 change = float(coin.get("priceChangePercentage", 0))
 
-                # filtre volume
-                if volume < 80000:
-                    continue
+                old_price = previous_prices.get(market, price)
 
-                # 🎯 DUMP
-                if -10 <= change <= -5 and market not in positions:
+                # variation courte (TRÈS IMPORTANT)
+                change_short = ((price - old_price) / old_price) * 100
 
-                    positions[market] = price
+                # variation 24h
+                change_24h = float(coin.get("priceChangePercentage", 0))
 
-                    print(f"🔥 BUY {market} {change}%")
+                previous_prices[market] = price
 
-                    log_event(market, price, change, volume, "BUY")
+                # filtre volume (plus souple)
+               if volume < 20000:
+                   continue
+                   
+                # 🎯 VRAI DUMP (court terme)
+                if change_short <= -3 and change_24h < 0 and market not in positions:
+
+                   positions[market] = price
+
+                   print(f"🔥 BUY {market} SHORT {change_short:.2f}%")
+
+                   log_event(market, price, change_short, volume, "BUY")
 
                 # 🎯 EXIT +5%
                 if market in positions:
@@ -84,7 +95,7 @@ while True:
                         print(f"💰 SELL {market} +{gain:.2f}%")
 
                         log_event(market, price, gain, volume, "SELL +5%")
-
+                       
                         del positions[market]
 
             except:
