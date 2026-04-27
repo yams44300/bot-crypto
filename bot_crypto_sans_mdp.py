@@ -25,8 +25,6 @@ client = gspread.authorize(creds)
 
 sheet = client.open_by_key("1Xvzy0NQdSu9UuztJaEqRZFSokPFHZvRFHjDy8_5YtkI").worksheet("TRADES")
 
-sheet.insert_row(["TEST FORCE", "OK"], index=2)
-
 # Header une seule fois
 if not sheet.get("A1"):
     sheet.update("A1:F1", [[
