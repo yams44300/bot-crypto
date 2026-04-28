@@ -46,7 +46,7 @@ def log_event(market, price, change, volume, status):
             change,
             volume,
             status
-        ]
+        ])
     except Exception as e:
         print("Sheets error:", e)
 
