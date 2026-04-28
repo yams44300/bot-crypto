@@ -39,14 +39,14 @@ def get_data():
 
 def log_event(market, price, change, volume, status):
     try:
-        sheet.insert_row([
+        sheet.append_row([
             str(datetime.now()),
             market,
             price,
             change,
             volume,
             status
-        ], index=2)
+        ]
     except Exception as e:
         print("Sheets error:", e)
 
