@@ -13,10 +13,7 @@ URL = "https://api.bitvavo.com/v2/ticker/24h"
 positions = {}
 previous_prices = {}
 
-# =========================
 # GOOGLE SHEETS
-# =========================
-
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
@@ -28,48 +25,33 @@ client = gspread.authorize(creds)
 
 sheet = client.open_by_key("1Xvzy0NQdSu9UuztJaEqRZFSokPFHZvRFHjDy8_5YtkI").worksheet("TRADES")
 
-# Header safe init
-if sheet.row_values(1) == []:
+# Header une seule fois
+# Header (une seule fois)
+if not sheet.get("A1"):
     sheet.update("A1:F1", [[
-        "Date", "Crypto", "Prix", "Variation %", "Volume", "Status"
+        "Date","Crypto","Prix","Variation %","Volume","Status"
     ]])
-
-# =========================
-# DATA FETCH
-# =========================
 
 def get_data():
     try:
-        r = requests.get(URL, timeout=10)
-        if r.status_code != 200:
-            print("API error:", r.status_code)
-            return []
-        return r.json()
-    except Exception as e:
-        print("Fetch error:", e)
+        return requests.get(URL, timeout=10).json()
+    except:
         return []
-
-# =========================
-# LOG SHEETS
-# =========================
 
 def log_event(market, price, change, volume, status):
     try:
-        sheet.insert_row([
+        sheet.append_row([
             str(datetime.now()),
             market,
             price,
+            change,
             round(change, 2),
             volume,
             status
-        ], 2)  # 🔥 insert en haut
+        ])
         print(f"📊 LOGGED: {market} {status}")
     except Exception as e:
         print("Sheets error:", e)
-
-# =========================
-# MAIN LOOP
-# =========================
 
 while True:
     print("Scan...", datetime.now())
@@ -78,95 +60,88 @@ while True:
         data = get_data()
 
         for coin in data:
-
             try:
-                market = coin.get("market")
-                if not market:
-                    continue
+                market = coin["market"]
+                price = float(coin["last"])
+                volume = float(coin.get("volume", 0))
+                change = float(coin.get("priceChangePercentage", 0))
 
-                price = float(coin.get("last") or 0)
-                volume = float(coin.get("volume") or 0)
+                # variations
+                old_price = previous_prices.get(market, price)
 
-                if price <= 0:
-                    continue
-
-                # =========================
-                # PRICE CHANGE SAFE
-                # =========================
-
-                old_price = previous_prices.get(market)
-
-                if old_price is None or old_price == 0:
-                    previous_prices[market] = price
-                    continue
-
+                # variation courte (TRÈS IMPORTANT)
                 change_short = ((price - old_price) / old_price) * 100
-                change_24h = float(coin.get("priceChangePercentage") or 0)
+
+                # variation 24h
+                change_24h = float(coin.get("priceChangePercentage", 0))
 
                 previous_prices[market] = price
 
-                # =========================
-                # LIQUIDITY FILTER
-                # =========================
-
+                # filtre volume (plus souple)
+                # filtre liquidité
                 if volume < 20000:
+                   continue
+                   
+                # 🎯 VRAI DUMP (court terme)
+                if change_short <= -4 and market not in positions:
+
+                   positions[market] = price
+
+                   print(f"🔥 BUY {market} SHORT {change_short:.2f}%")
+
+                   log_event(market, price, change_short, volume, "BUY")
+
+                # 🎯 EXIT +5%
                     continue
 
                 # =========================
-                # AVOID RE-SPAM ENTRY
+                # 🟢 STRAT 1 : REBOUND
                 # =========================
-
-                in_position = market in positions
-
-                # =========================
-                # 🟢 REBOUND STRATEGY
-                # =========================
-
                 if (
                     change_short <= -5 and
                     change_24h < -2 and
-                    not in_position
+                    market not in positions
                 ):
                     positions[market] = price
+
                     print(f"🟢 REBOUND BUY {market} {change_short:.2f}%")
+
                     log_event(market, price, change_short, volume, "BUY REBOUND")
 
                 # =========================
-                # 🔵 PULLBACK STRATEGY
+                # 🔵 STRAT 2 : PULLBACK
                 # =========================
-
-                elif (
+                if (
                     change_short <= -4 and
                     change_24h > 5 and
-                    not in_position
+                    market not in positions
                 ):
                     positions[market] = price
+
                     print(f"🔵 PULLBACK BUY {market} {change_short:.2f}%")
+
                     log_event(market, price, change_short, volume, "BUY PULLBACK")
 
                 # =========================
-                # 💰 EXIT STRATEGY
+                # 💰 EXIT
                 # =========================
+                if market in positions:
+                    entry = positions[market]
+                    gain = ((price - entry) / entry) * 100
 
-                if in_position:
+                    if gain >= 5:
+                        print(f"💰 SELL {market} +{gain:.2f}%")
 
-                    entry = positions.get(market)
+                        log_event(market, price, gain, volume, "SELL +5%")
+                       
 
-                    if entry and entry > 0:
-                        gain = ((price - entry) / entry) * 100
+                        del positions[market]
 
-                        if gain >= 5:
-                            print(f"💰 SELL {market} +{gain:.2f}%")
-
-                            log_event(market, price, gain, volume, "SELL +5%")
-
-                            del positions[market]
-
+            except:
             except Exception as e:
-                print("Coin error:", e)
                 continue
 
     except Exception as e:
-        print("Main loop error:", e)
+        print("Erreur:", e)
 
     time.sleep(60)
