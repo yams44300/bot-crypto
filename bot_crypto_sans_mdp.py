@@ -74,11 +74,11 @@ while True:
                 previous_prices[market] = price
 
                 # filtre volume (plus souple)
-                if volume < 10000:
+                if volume < 20000:
                    continue
                    
                 # 🎯 VRAI DUMP (court terme)
-                if change_short <= -2 and market not in positions:
+                if change_short <= -4 and market not in positions:
 
                    positions[market] = price
 
