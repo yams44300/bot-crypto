@@ -25,7 +25,6 @@ client = gspread.authorize(creds)
 
 sheet = client.open_by_key("1Xvzy0NQdSu9UuztJaEqRZFSokPFHZvRFHjDy8_5YtkI").worksheet("TRADES")
 
-# Header une seule fois
 # Header (une seule fois)
 if not sheet.get("A1"):
     sheet.update("A1:F1", [[
@@ -44,7 +43,6 @@ def log_event(market, price, change, volume, status):
             str(datetime.now()),
             market,
             price,
-            change,
             round(change, 2),
             volume,
             status
@@ -64,35 +62,17 @@ while True:
                 market = coin["market"]
                 price = float(coin["last"])
                 volume = float(coin.get("volume", 0))
-                change = float(coin.get("priceChangePercentage", 0))
 
                 # variations
                 old_price = previous_prices.get(market, price)
-
-                # variation courte (TRÈS IMPORTANT)
                 change_short = ((price - old_price) / old_price) * 100
-
-                # variation 24h
                 change_24h = float(coin.get("priceChangePercentage", 0))
 
                 previous_prices[market] = price
 
-                # filtre volume (plus souple)
                 # filtre liquidité
                 if volume < 20000:
-                   continue
-                   
-                # 🎯 VRAI DUMP (court terme)
-                if change_short <= -4 and market not in positions:
-
-                   positions[market] = price
-
-                   print(f"🔥 BUY {market} SHORT {change_short:.2f}%")
-
-                   log_event(market, price, change_short, volume, "BUY")
-
-                # 🎯 EXIT +5%
-                continue
+                    continue
 
                 # =========================
                 # 🟢 STRAT 1 : REBOUND
@@ -133,15 +113,13 @@ while True:
                         print(f"💰 SELL {market} +{gain:.2f}%")
 
                         log_event(market, price, gain, volume, "SELL +5%")
-                       
 
                         del positions[market]
 
-            except:
             except Exception as e:
                 continue
 
-            except Exception as e:
-                print("Erreur:", e)
+    except Exception as e:
+        print("Erreur:", e)
 
     time.sleep(60)
