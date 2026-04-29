@@ -92,7 +92,7 @@ while True:
                    log_event(market, price, change_short, volume, "BUY")
 
                 # 🎯 EXIT +5%
-                    continue
+                continue
 
                 # =========================
                 # 🟢 STRAT 1 : REBOUND
