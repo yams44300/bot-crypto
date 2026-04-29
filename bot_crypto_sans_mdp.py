@@ -141,7 +141,7 @@ while True:
             except Exception as e:
                 continue
 
-    except Exception as e:
-     print("Erreur:", e)
+            except Exception as e:
+                print("Erreur:", e)
 
     time.sleep(60)
