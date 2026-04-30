@@ -78,8 +78,8 @@ while True:
                 # 🟢 STRAT 1 : REBOUND
                 # =========================
                 if (
-                    change_short <= -5 and
-                    change_24h < -2 and
+                    change_short <= -3 and
+                    change_24h < -1 and
                     market not in positions
                 ):
                     positions[market] = price
@@ -92,8 +92,8 @@ while True:
                 # 🔵 STRAT 2 : PULLBACK
                 # =========================
                 if (
-                    change_short <= -4 and
-                    change_24h > 5 and
+                    change_short <= -2.5 and
+                    change_24h > 3 and
                     market not in positions
                 ):
                     positions[market] = price
