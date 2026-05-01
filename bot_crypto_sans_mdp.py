@@ -66,58 +66,16 @@ while True:
                 # variations
                 old_price = previous_prices.get(market, price)
                 change_short = ((price - old_price) / old_price) * 100
-                change_24h = float(coin.get("priceChangePercentage", 0))
-
                 previous_prices[market] = price
 
-                # filtre liquidité
-                if volume < 10000:
-                    continue
-
-                # =========================
-                # 🟢 STRAT 1 : REBOUND
-                # =========================
-                if (
-                    change_short <= -1.5 and
-                    change_24h < -0.5 and
-                    market not in positions
-                ):
+                # 🔥 TEST FORCÉ
+                if market not in positions:
                     positions[market] = price
-
-                    print(f"🟢 REBOUND BUY {market} {change_short:.2f}%")
-
-                    log_event(market, price, change_short, volume, "BUY REBOUND")
-
-                # =========================
-                # 🔵 STRAT 2 : PULLBACK
-                # =========================
-                if (
-                    change_short <= -1.5 and
-                    change_24h > 1 and
-                    market not in positions
-                ):
-                    positions[market] = price
-
-                    print(f"🔵 PULLBACK BUY {market} {change_short:.2f}%")
-
-                    log_event(market, price, change_short, volume, "BUY PULLBACK")
-    
-                # =========================
-                # 💰 EXIT
-                # =========================
-                if market in positions:
-                    entry = positions[market]
-                    gain = ((price - entry) / entry) * 100
-
-                    if gain >= 5:
-                        print(f"💰 SELL {market} +{gain:.2f}%")
-
-                        log_event(market, price, gain, volume, "SELL +5%")
-
-                        del positions[market]
-
-            except Exception as e:
-                continue
+                    
+                    print(f"TEST BUY {market}")
+                    
+                    log_event(market, price, change_short, volume, "BUY TEST")
+                
 
     except Exception as e:
         print("Erreur:", e)
