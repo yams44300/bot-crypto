@@ -71,7 +71,7 @@ while True:
                 previous_prices[market] = price
 
                 # filtre liquidité
-                if volume < 15000:
+                if volume < 10000:
                     continue
 
                 # =========================
