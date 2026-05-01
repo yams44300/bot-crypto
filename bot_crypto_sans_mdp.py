@@ -101,7 +101,15 @@ while True:
                     print(f"🔵 PULLBACK BUY {market} {change_short:.2f}%")
 
                     log_event(market, price, change_short, volume, "BUY PULLBACK")
+                    
+                # TEST REALISTE
+                if change_short <= -1 and market not in positions:
+                   positions[market] = price
 
+                   print(f"🔥 BUY {market} {change_short:.2f}%")
+
+    `              log_event(market, price, change_short, volume, "BUY TEST")
+    
                 # =========================
                 # 💰 EXIT
                 # =========================
