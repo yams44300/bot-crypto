@@ -75,8 +75,10 @@ while True:
                     print(f"TEST BUY {market}")
                     
                     log_event(market, price, change_short, volume, "BUY TEST")
-                
-
+                    
+             except Exception as e:   
+                 print("Erreur coin:", e)
+                 
     except Exception as e:
         print("Erreur:", e)
 
