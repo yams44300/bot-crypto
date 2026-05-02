@@ -67,9 +67,17 @@ while True:
 
         for coin in data:
             try:
-                market = coin["market"]
-                price = float(coin["last"])
-                volume = float(coin.get("volume", 0))
+                market = coin.get("market")
+
+                price_raw = coin.get("last")
+                volume_raw = coin.get("volume")
+
+                # skip si données invalides
+                if price == 0 or volume == 0:
+                    continue
+
+                price = float(price_raw)
+                volume = float(volume_raw)
 
                 # variation court terme
                 old_price = previous_prices.get(market, price)
