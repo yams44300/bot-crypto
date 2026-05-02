@@ -6,7 +6,7 @@ import json
 import gspread
 from google.oauth2.service_account import Credentials
 
-print("Bot lancé ✔️")
+print("Bot lancé Batard de tes morts✔️")
 
 URL = "https://api.bitvavo.com/v2/ticker/24h"
 
