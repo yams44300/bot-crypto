@@ -6,7 +6,7 @@ import json
 import gspread
 from google.oauth2.service_account import Credentials
 
-print("Bot lancé Batard !!!✔️")
+print("Bot lancé ✔️")
 
 URL = "https://api.bitvavo.com/v2/ticker/24h"
 
@@ -68,16 +68,22 @@ while True:
         for coin in data:
             try:
                 market = coin.get("market")
+                if not market:
+                    continue
 
                 price_raw = coin.get("last")
                 volume_raw = coin.get("volume")
 
-                # skip si données invalides
-                if price == 0 or volume == 0:
+                # 🔒 sécurité API
+                if price_raw is None or volume_raw is None:
                     continue
 
                 price = float(price_raw)
                 volume = float(volume_raw)
+
+                # ignore valeurs nulles
+                if price == 0 or volume == 0:
+                    continue
 
                 # variation court terme
                 old_price = previous_prices.get(market, price)
@@ -85,7 +91,7 @@ while True:
                 previous_prices[market] = price
 
                 # variation 24h
-                change_24h = float(coin.get("priceChangePercentage", 0))
+                change_24h = float(coin.get("priceChangePercentage") or 0)
 
                 # =========================
                 # FILTRE LIQUIDITÉ
