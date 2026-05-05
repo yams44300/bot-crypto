@@ -102,16 +102,13 @@ while True:
                 # =========================
                 # 🟢 STRAT 1 : REBOUND
                 # =========================
-                if (
-                    change_short <= -2.5 and
-                    change_24h < -1 and
-                    market not in positions
-                ):
+                if change_short <= -1 and market not in positions:
+                    
                     positions[market] = price
 
                     print(f"🟢 REBOUND BUY {market} {change_short:.2f}%")
 
-                    log_event(market, price, change_short, volume, "BUY REBOUND")
+                    log_event(market, price, change_short, volume, "BUY TEST")
 
                 # =========================
                 # 🔵 STRAT 2 : PULLBACK
@@ -134,10 +131,10 @@ while True:
                     entry = positions[market]
                     gain = ((price - entry) / entry) * 100
 
-                    if gain >= 3:
+                    if gain >= 2:
                         print(f"💰 SELL {market} +{gain:.2f}%")
 
-                        log_event(market, price, gain, volume, "SELL +3%")
+                        log_event(market, price, gain, volume, "SELL +2%")
 
                         del positions[market]
 
