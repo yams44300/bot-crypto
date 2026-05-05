@@ -96,19 +96,22 @@ while True:
                 # =========================
                 # FILTRE LIQUIDITÉ
                 # =========================
-                if volume < 10000:
+                if volume < 20000:
                     continue
 
                 # =========================
                 # 🟢 STRAT 1 : REBOUND
                 # =========================
-                if change_short <= -1 and market not in positions:
-                    
+                if (
+                    change_short <= -2 and 
+                    change_24h < 0 and
+                    market not in positions:
+                ):  
                     positions[market] = price
 
                     print(f"🟢 REBOUND BUY {market} {change_short:.2f}%")
 
-                    log_event(market, price, change_short, volume, "BUY TEST")
+                    log_event(market, price, change_short, volume, "BUY")
 
                 # =========================
                 # 🔵 STRAT 2 : PULLBACK
@@ -131,10 +134,10 @@ while True:
                     entry = positions[market]
                     gain = ((price - entry) / entry) * 100
 
-                    if gain >= 2:
+                    if gain >= 3:
                         print(f"💰 SELL {market} +{gain:.2f}%")
 
-                        log_event(market, price, gain, volume, "SELL +2%")
+                        log_event(market, price, gain, volume, "SELL +3%")
 
                         del positions[market]
 
