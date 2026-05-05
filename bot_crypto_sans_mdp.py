@@ -105,7 +105,7 @@ while True:
                 if (
                     change_short <= -2 and 
                     change_24h < 0 and
-                    market not in positions:
+                    market not in positions
                 ):  
                     positions[market] = price
 
