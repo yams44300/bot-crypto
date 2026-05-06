@@ -96,36 +96,25 @@ while True:
                 # =========================
                 # FILTRE LIQUIDITÉ
                 # =========================
-                if volume < 10000:
+                if volume < 20000:
                     continue
 
                 # =========================
-                # 🟢 STRAT 1 : REBOUND
+                # FILTRE VOLATILITÉ (évite crash)
                 # =========================
-                if (
-                    change_short <= -2 and 
-                    change_24h < 0 and
-                    market not in positions
-                ):  
+                if abs(change_short) > 6:
+                    continue
+
+                # =========================
+                # 🎯 DUMP COURT TERME
+                # =========================
+                if change_short <= -2 and market not in positions:
+                    
                     positions[market] = price
 
-                    print(f"🟢 REBOUND BUY {market} {change_short:.2f}%")
+                    print(f"🔥 BUY {market} {change_short:.2f}%")
 
                     log_event(market, price, change_short, volume, "BUY")
-
-                # =========================
-                # 🔵 STRAT 2 : PULLBACK
-                # =========================
-                if (
-                    change_short <= -2 and
-                    change_24h > 3 and
-                    market not in positions
-                ):
-                    positions[market] = price
-
-                    print(f"🔵 PULLBACK BUY {market} {change_short:.2f}%")
-
-                    log_event(market, price, change_short, volume, "BUY PULLBACK")
 
                 # =========================
                 # 💰 EXIT
@@ -134,10 +123,10 @@ while True:
                     entry = positions[market]
                     gain = ((price - entry) / entry) * 100
 
-                    if gain >= 3:
+                    if gain >= 2.5:
                         print(f"💰 SELL {market} +{gain:.2f}%")
 
-                        log_event(market, price, gain, volume, "SELL +3%")
+                        log_event(market, price, gain, volume, "SELL +2.5%")
 
                         del positions[market]
 
