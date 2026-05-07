@@ -108,7 +108,7 @@ while True:
                 # =========================
                 # 🎯 DUMP COURT TERME
                 # =========================
-                if change_short <= -2 and market not in positions:
+                if change_short <= -3 and market not in positions:
                     
                     positions[market] = price
 
@@ -123,10 +123,10 @@ while True:
                     entry = positions[market]
                     gain = ((price - entry) / entry) * 100
 
-                    if gain >= 2.5:
+                    if gain >= 3.5:
                         print(f"💰 SELL {market} +{gain:.2f}%")
 
-                        log_event(market, price, gain, volume, "SELL +2.5%")
+                        log_event(market, price, gain, volume, "SELL +3.5%")
 
                         del positions[market]
 
