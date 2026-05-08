@@ -6,12 +6,13 @@ import json
 import gspread
 from google.oauth2.service_account import Credentials
 
-print("Bot lancé Batard de tes morts✔️")
+print("Bot lancé ✔️")
 
 URL = "https://api.bitvavo.com/v2/ticker/24h"
 
 positions = {}
 previous_prices = {}
+last_trade_time = {}  # 🔥 AJOUT COOLDOWN
 
 # =========================
 # GOOGLE SHEETS
@@ -74,23 +75,31 @@ while True:
                 price_raw = coin.get("last")
                 volume_raw = coin.get("volume")
 
-                # 🔒 sécurité API
                 if price_raw is None or volume_raw is None:
                     continue
 
                 price = float(price_raw)
                 volume = float(volume_raw)
 
-                # ignore valeurs nulles
                 if price == 0 or volume == 0:
                     continue
 
-                # variation court terme
+                # =========================
+                # COOLDOWN 🔥 (NEW)
+                # =========================
+                now = time.time()
+                last_trade = last_trade_time.get(market, 0)
+
+                if now - last_trade < 3600:
+                    continue
+
+                # =========================
+                # PRICE CHANGE
+                # =========================
                 old_price = previous_prices.get(market, price)
                 change_short = ((price - old_price) / old_price) * 100
                 previous_prices[market] = price
 
-                # variation 24h
                 change_24h = float(coin.get("priceChangePercentage") or 0)
 
                 # =========================
@@ -100,35 +109,38 @@ while True:
                     continue
 
                 # =========================
-                # FILTRE VOLATILITÉ (évite crash)
+                # FILTRE VOLATILITÉ
                 # =========================
-                if abs(change_short) > 6:
+                if abs(change_short) > 10:
                     continue
 
                 # =========================
-                # 🎯 DUMP COURT TERME
+                # BUY
                 # =========================
-                if change_short <= -3 and market not in positions:
-                    
+                if change_short <= -4.5 and market not in positions:
+
                     positions[market] = price
+                    last_trade_time[market] = now  # 🔥 UPDATE COOLDOWN
 
                     print(f"🔥 BUY {market} {change_short:.2f}%")
 
                     log_event(market, price, change_short, volume, "BUY")
 
                 # =========================
-                # 💰 EXIT
+                # SELL
                 # =========================
                 if market in positions:
                     entry = positions[market]
                     gain = ((price - entry) / entry) * 100
 
                     if gain >= 3.5:
+
                         print(f"💰 SELL {market} +{gain:.2f}%")
 
-                        log_event(market, price, gain, volume, "SELL +3.5%")
+                        log_event(market, price, gain, volume, "SELL +4.5%")
 
                         del positions[market]
+                        last_trade_time[market] = now  # 🔥 UPDATE COOLDOWN
 
             except Exception as e:
                 print("Erreur coin:", e)
