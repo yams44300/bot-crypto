@@ -90,7 +90,7 @@ while True:
                 now = time.time()
                 last_trade = last_trade_time.get(market, 0)
 
-                if now - last_trade < 3600:
+                if now - last_trade < 7200:
                     continue
 
                 # =========================
@@ -105,7 +105,7 @@ while True:
                 # =========================
                 # FILTRE LIQUIDITÉ
                 # =========================
-                if volume < 1000000:
+                if volume < 3000000:
                     continue
 
                 # =========================
@@ -117,7 +117,7 @@ while True:
                 # =========================
                 # BUY
                 # =========================
-                if change_short <= -4.5 and market not in positions:
+                if change_short <= -5 and market not in positions:
 
                     positions[market] = price
                     last_trade_time[market] = now  # 🔥 UPDATE COOLDOWN
@@ -133,11 +133,11 @@ while True:
                     entry = positions[market]
                     gain = ((price - entry) / entry) * 100
 
-                    if gain >= 3.5:
+                    if gain >= 5:
 
                         print(f"💰 SELL {market} +{gain:.2f}%")
 
-                        log_event(market, price, gain, volume, "SELL +4.5%")
+                        log_event(market, price, gain, volume, "SELL +5%")
 
                         del positions[market]
                         last_trade_time[market] = now  # 🔥 UPDATE COOLDOWN
