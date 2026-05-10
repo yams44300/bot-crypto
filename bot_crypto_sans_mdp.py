@@ -90,7 +90,7 @@ while True:
                 now = time.time()
                 last_trade = last_trade_time.get(market, 0)
 
-                if now - last_trade < 7200:
+                if now - last_trade < 1800:
                     continue
 
                 # =========================
@@ -133,11 +133,11 @@ while True:
                     entry = positions[market]
                     gain = ((price - entry) / entry) * 100
 
-                    if gain >= 5:
+                    if gain >= 6:
 
                         print(f"💰 SELL {market} +{gain:.2f}%")
 
-                        log_event(market, price, gain, volume, "SELL +5%")
+                        log_event(market, price, gain, volume, "SELL +6%")
 
                         del positions[market]
                         last_trade_time[market] = now  # 🔥 UPDATE COOLDOWN
