@@ -111,7 +111,7 @@ while True:
                 # =========================
                 # FILTRE VOLATILITÉ
                 # =========================
-                if abs(change_short) > 10:
+                if abs(change_short) > 12:
                     continue
 
                 # =========================
